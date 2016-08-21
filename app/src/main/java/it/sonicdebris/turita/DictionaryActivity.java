@@ -13,10 +13,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
-
 import java.io.IOException;
-import java.util.List;
 
+import it.sonicdebris.turita.glosbe.Result;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -82,21 +81,22 @@ public class DictionaryActivity extends AppCompatActivity
         public boolean onQueryTextSubmit(String query)
         {
             Log.i("onQueryTextSubmit", query);
-            Call<ResponseBody> call = glosbe.Search(query);
+            Call<Result> call = glosbe.SearchIta(query);
 
-            call.enqueue( new Callback<ResponseBody>() {
+            call.enqueue( new Callback<Result>() {
 
                 @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
+                public void onResponse(Call<Result> call, Response<Result> response)
                 {
                     String txt;
                     if (response.isSuccessful())
                     {
-                        try {
+                       /*try {
                             txt = response.body().string();
                         } catch (IOException e) {
                             txt = "Can't parse response";
-                        }
+                        }*/
+                        txt = response.body().toString();
                     }
                     else
                         txt = "Response unsuccessful";
@@ -105,7 +105,7 @@ public class DictionaryActivity extends AppCompatActivity
                 }
 
                 @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t)
+                public void onFailure(Call<Result> call, Throwable t)
                 {
                     assert (findViewById(R.id.result_textview)) != null;
                     ((TextView)findViewById(R.id.result_textview)).setText("Request error");
@@ -114,40 +114,4 @@ public class DictionaryActivity extends AppCompatActivity
             return true;
         }
     };
-
-    void TestRetrofit()
-    {
-        GitHubClient client = ServiceGenerator.createService(GitHubClient.class);
-        Log.d("Retrofit", "Retro call");
-        // Fetch and print a list of the contributors to this library.
-        Call<GitHubClient.User> call = client.GetUser("sonicdebris");
-
-        call.enqueue(new Callback<GitHubClient.User> () {
-            @Override
-            public void onResponse(Call<GitHubClient.User> call, Response<GitHubClient.User> response)
-            {
-                if (response.isSuccessful())
-                {
-                    GitHubClient.User u = response.body();
-                    Log.d("Retrofit","Retro user "+u.login+". id: "+u.id);
-                }
-                else
-                {
-                    Log.e("Retrofit","Retro response not successful. "+response.raw().toString());
-                    // error response, no access to resource?
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GitHubClient.User> call, Throwable t)
-            {
-                // something went completely south (like no internet connection)
-                Log.e("Error", "Retro "+t.getMessage());
-            }
-        });
-
-        Log.d("Retrofit","Retro called");
-    }
-    // suggestions while typing:
-    // https://ramannanda.blogspot.it/2014/10/android-searchview-integration-with.html
 }
